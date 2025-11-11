@@ -5,7 +5,7 @@ import { useAccount, useReadContract } from "wagmi";
 import { Header } from "@/components/Header";
 import { CreatePollForm } from "@/components/CreatePollForm";
 import { PollList } from "@/components/PollList";
-import { useFhevm } from "@/hooks/useFhevm";
+import { useFhevmContext } from "@/hooks/useFhevmProvider";
 import { MultiChoiceVotingABI } from "@/abi/MultiChoiceVotingABI";
 import { getContractAddress } from "@/config/contract";
 
@@ -34,7 +34,7 @@ function StatCard({
 
 export default function Home() {
   const { isConnected, chain } = useAccount();
-  const { isReady: fhevmReady, error: fhevmError } = useFhevm();
+  const { isReady: fhevmReady, error: fhevmError } = useFhevmContext();
 
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -77,7 +77,7 @@ export default function Home() {
     if (fhevmError) {
       return {
         label: "Initialisation failed",
-        helper: fhevmError,
+        helper: fhevmError.message || "Unknown error occurred",
         accent: "bg-gradient-to-br from-red-500/40 via-red-500/10 to-transparent",
       };
     }

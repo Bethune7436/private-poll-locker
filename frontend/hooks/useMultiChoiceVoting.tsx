@@ -3,13 +3,13 @@
 import { useState, useCallback, useMemo } from "react";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { hexlify } from "ethers";
-import { useFhevm } from "./useFhevm";
+import { useFhevmContext } from "./useFhevmProvider";
 import { CONTRACT_ADDRESSES } from "@/config/contract";
 import { MultiChoiceVotingABI } from "@/abi/MultiChoiceVotingABI";
 
 export function useMultiChoiceVoting() {
   const { address, chain, isConnected } = useAccount();
-  const { fhevm, isReady: fhevmReady, error: fhevmError } = useFhevm();
+  const { instance: fhevm, isReady: fhevmReady, error: fhevmError } = useFhevmContext();
   const { writeContractAsync } = useWriteContract();
   
   const [isLoading, setIsLoading] = useState(false);
@@ -194,7 +194,10 @@ export function useMultiChoiceVoting() {
           // Sign the message using wallet (only once!)
           const { signTypedData } = await import("wagmi/actions");
           const signature = await signTypedData(config, {
-            domain: eip712.domain,
+            domain: {
+              ...eip712.domain,
+              verifyingContract: eip712.domain.verifyingContract as `0x${string}`,
+            },
             types: eip712.types as any,
             primaryType: 'UserDecryptRequestVerification',
             message: eip712.message,
